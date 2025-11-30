@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* Condensed CSS for core functionality and blue highlight */
+  body{display:flex;justify-content:center;margin:0;background:#f0f0f0;}
+  #app{width:350px;background:#fff;border:1px solid #ccc;display:flex;flex-direction:column;height:500px;}
+  #chat{flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .msg{padding:8px 12px;border-radius:15px;max-width:80%;font-size:14px;line-height:1.4;}
+  .bot{align-self:flex-start;background:#eee;color:#000;border-bottom-left-radius:0;}
+  .user{align-self:flex-end;background:#007bff;color:#fff;border-bottom-right-radius:0;}
+  .opt-group{align-self:flex-start;display:flex;flex-wrap:wrap;gap:5px;max-width:100%;}
+  .btn{border:1px solid #007bff;color:#007bff;background:#fff;padding:6px 10px;border-radius:12px;cursor:pointer;font-size:13px;}
+  .btn:hover{background:#007bff;color:#fff;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="chat"></div>
+</div>
+
+<script>
+  // Config: 't'=text, 'o'=options ({l:label, n:next_id})
+  const data = {
+    start: { t: "Are you under work up?", o: [{l:"Yes", n:"type"}, {l:"No", n:"no_ref"}] },
+    type:  { t: "Ship or Submarine?", o: [{l:"Ship", n:"dur"}, {l:"Submarine", n:"sub_ref"}] },
+    dur:   { t: "Long or Short?", o: [{l:"Long", n:"long_ref"}, {l:"Short", n:"short_ref"}] },
+    // Results (no 'o' = end)
+    no_ref:    { t: "Ref: SOP-101" },
+    sub_ref:   { t: "Ref: SUB-200" },
+    long_ref:  { t: "Ref: LDSM-A" },
+    short_ref: { t: "Ref: RDG-B" }
+  };
+
+  const chat = document.getElementById("chat");
+
+  function addMsg(txt, isUser) {
+    const d = document.createElement("div");
+    d.className = "msg " + (isUser ? "user" : "bot");
+    d.innerHTML = txt;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight; 
+  }
+
+  function go(id) {
+    const node = data[id];
+    addMsg(node.t, false);
+
+    const grp = document.createElement("div");
+    grp.className = "opt-group";
+    
+    if (node.o) {
+      node.o.forEach(opt => {
+        const b = document.createElement("button");
+        b.className = "btn";
+        b.innerText = opt.l;
+        b.onclick = () => {
+          grp.remove();
+          addMsg(opt.l, true);
+          go(opt.n);
+        };
+        grp.appendChild(b);
+      });
+    } else {
+      // End: Restart button
+      const b = document.createElement("button");
+      b.className = "btn"; 
+      b.innerText = "Start Over";
+      b.onclick = () => { chat.innerHTML=""; go("start"); };
+      grp.appendChild(b);
+    }
+    
+    chat.appendChild(grp);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  // Init
+  go("start");
+</script>
+
+</body>
+</html>
