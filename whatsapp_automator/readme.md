@@ -11,3 +11,7 @@ npm install whatsapp-web.js qrcode-terminal
 
 > Optional: Install nodemon globally if needed
 npm install -g nodemon
+
+whatsapp working
+
+![](2026-01-02-23-37-18.png)

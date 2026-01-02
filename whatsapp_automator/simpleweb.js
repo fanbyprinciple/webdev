@@ -12,35 +12,33 @@ const client = new Client({
 client.on('qr', qr => {
     console.clear();
     qrcode.generate(qr, { small: true });
-    console.log('📱 Scan this QR code with WhatsApp\n');
+    console.log('>>Scan this QR code with WhatsApp\n');
     console.log('1. Open WhatsApp on your phone');
     console.log('2. Tap Menu → Linked Devices → Link a Device');
     console.log('3. Scan the QR code above');
 });
 
 client.on('ready', () => {
-    console.log('✅ WhatsApp bot is ready!');
+    console.log('>>WhatsApp bot is ready!');
     console.log('Send "!ping" to test it');
 });
 
 client.on('authenticated', () => {
-    console.log('✅ Authenticated successfully!');
+    console.log('>>Authenticated successfully!');
 });
 
 client.on('auth_failure', msg => {
-    console.error('❌ Authentication failed:', msg);
+    console.error('>>Authentication failed:', msg);
 });
 
 client.on('message', msg => {
-    console.log(`📩 Message from ${msg.from}: ${msg.body}`);
+    console.log(`>>Message from ${msg.from}: ${msg.body}`);
     
-    if (msg.body.toLowerCase() === '!ping') {
+    if (msg.body[0] == '!') {
+
         msg.reply('🏓 pong!');
     }
     
-    if (msg.body.toLowerCase() === '!help') {
-        msg.reply('Available commands:\n!ping - Test the bot\n!help - Show this help');
-    }
 });
 
 console.log('🚀 Starting WhatsApp bot...');
