@@ -1,5 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -9,36 +10,56 @@ const client = new Client({
     }
 });
 
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI('your-api-key-here');
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 client.on('qr', qr => {
     console.clear();
     qrcode.generate(qr, { small: true });
-    console.log('>>Scan this QR code with WhatsApp\n');
-    console.log('1. Open WhatsApp on your phone');
-    console.log('2. Tap Menu → Linked Devices → Link a Device');
-    console.log('3. Scan the QR code above');
+    console.log('>>Scan QR code with WhatsApp');
 });
 
 client.on('ready', () => {
-    console.log('>>WhatsApp bot is ready!');
-    console.log('Send "!ping" to test it');
+    console.log('>>Bot ready! Type ![question] to chat with Gemini');
 });
 
-client.on('authenticated', () => {
-    console.log('>>Authenticated successfully!');
-});
-
-client.on('auth_failure', msg => {
-    console.error('>>Authentication failed:', msg);
-});
-
-client.on('message', msg => {
-    console.log(`>>Message from ${msg.from}: ${msg.body}`);
+client.on('message', async msg => {
+    console.log(`From ${msg.from}: ${msg.body}`);
     
-    if (msg.body[0] == '!') {
+    // Skip status messages
+    if (msg.from === 'status@broadcast') return;
+    
+    // Simple command handler
+    if (msg.body.startsWith('!') ) {
 
+        const question = msg.body.slice(1).trim();
+        
+        if (!question) {
+            msg.reply('❌ Please provide a question after !ask');
+            return;
+        }
+        
+        try {
+            await msg.reply('💭 Thinking...');
+            
+            const result = await model.generateContent(question);
+            const response = await result.response;
+            const answer = response.text();
+            
+            await msg.reply(answer);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            msg.reply('❌ Error: ' + error.message);
+        }
+    }
+    else if (msg.body === '!ping') {
         msg.reply('🏓 pong!');
     }
-    
+    else if (msg.body === '!help') {
+        msg.reply('Commands: !ping, !ask [question], !gemini [question]');
+    }
 });
 
 console.log('🚀 Starting WhatsApp bot...');
